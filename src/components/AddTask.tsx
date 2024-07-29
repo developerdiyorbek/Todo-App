@@ -3,8 +3,10 @@ import { v4 as uuidv4 } from "uuid";
 import { todoUtils } from "@/utils/todoUtils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, TextField } from "@mui/material";
+import { useState } from "react";
 
 const AddTask = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
 
   // add task function
@@ -12,18 +14,22 @@ const AddTask = () => {
     mutationFn: todoUtils.addTodo,
     onSuccess: () => {
       queryClient.invalidateQueries({ type: "all" });
+      setIsLoading(false);
     },
     onError: (err) => {
       console.log(err, "error to add task");
+      setIsLoading(false);
     },
   });
 
   // add task
   const handleSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
     const inputValue = event.target.task.value.trim();
     if (inputValue.length === 0) {
       toast.error("Write something!");
+      setIsLoading(false);
     } else {
       addTask.mutate({
         title: inputValue,
@@ -49,6 +55,7 @@ const AddTask = () => {
         color="primary"
         className="rounded-r-md hover:bg-blue-600"
         sx={{ height: "55px" }}
+        disabled={isLoading}
       >
         Add Task
       </Button>

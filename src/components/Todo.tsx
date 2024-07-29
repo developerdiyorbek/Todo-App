@@ -8,6 +8,9 @@ import { FaTrash } from "react-icons/fa";
 
 const Todo = (props: TodoProps) => {
   const queryClient = useQueryClient();
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [completed, setCompleted] = useState(props.todo.completed);
 
   // delete todo function
@@ -16,15 +19,18 @@ const Todo = (props: TodoProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ type: "all" });
       toast.success("Task deleted");
+      setDeleteLoading(false);
     },
     onError: (err) => {
       console.log(err, "Delete task");
       toast.error("Error");
+      setDeleteLoading(false);
     },
   });
 
   // delete Task
   const handleDelete = (id: number) => {
+    setDeleteLoading(true);
     deleteTodo.mutate(id);
   };
 
@@ -33,14 +39,17 @@ const Todo = (props: TodoProps) => {
     mutationFn: todoUtils.editTodo,
     onSuccess: () => {
       queryClient.invalidateQueries({ type: "all" });
+      setIsLoading(false);
     },
     onError: (err) => {
       console.log(err, "Edit task");
+      setIsLoading(false);
     },
   });
 
   // completed task
   const handleComplete = (id: number) => {
+    setIsLoading(true);
     const getTodoById: TaskType | undefined = props?.todos.find(
       (todo: TaskType) => todo.id == id
     );
@@ -57,6 +66,7 @@ const Todo = (props: TodoProps) => {
           checked={completed}
           color="success"
           onChange={() => handleComplete(props.todo.id)}
+          disabled={isLoading}
         />
         <Typography
           component="span"
@@ -75,6 +85,7 @@ const Todo = (props: TodoProps) => {
             backgroundColor: "#cc0000",
           },
         }}
+        disabled={deleteLoading}
         onClick={() => handleDelete(props?.todo.id)}
       >
         <FaTrash />

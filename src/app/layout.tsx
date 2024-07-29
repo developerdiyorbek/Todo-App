@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Todo App",
-  description: "Genereted Todo App with Next JS",
+  description: "Todo App by Diyorbek Sulaymonov",
   icons: {
     icon: "./favicon.ico",
   },
