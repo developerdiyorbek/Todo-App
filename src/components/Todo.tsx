@@ -59,7 +59,7 @@ const Todo = (props: TodoProps) => {
   };
 
   return (
-    <li className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded-md mb-2">
+    <li className="bg-gray-100 px-4 py-2 rounded-md mb-2 flex items-center justify-between">
       <label className="w-full cursor-pointer flex items-center gap-1">
         <Checkbox
           name="checkbox"
@@ -70,7 +70,9 @@ const Todo = (props: TodoProps) => {
         />
         <Typography
           component="span"
-          className={`${completed ? "line-through opacity-75" : "opacity-100"}`}
+          className={`w-3/5 ${
+            completed ? "line-through opacity-75" : "opacity-100"
+          }`}
         >
           {props?.todo.title}
         </Typography>
