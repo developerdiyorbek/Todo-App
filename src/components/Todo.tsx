@@ -8,10 +8,9 @@ import { FaTrash } from "react-icons/fa";
 
 const Todo = (props: TodoProps) => {
   const queryClient = useQueryClient();
+
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [completed, setCompleted] = useState(props.todo.completed);
 
   // delete todo function
   const deleteTodo = useMutation({
@@ -22,7 +21,7 @@ const Todo = (props: TodoProps) => {
       setDeleteLoading(false);
     },
     onError: (err) => {
-      console.log(err, "Delete task");
+      console.error(err, "Delete task");
       toast.error("Error");
       setDeleteLoading(false);
     },
@@ -42,20 +41,15 @@ const Todo = (props: TodoProps) => {
       setIsLoading(false);
     },
     onError: (err) => {
-      console.log(err, "Edit task");
+      console.error(err, "Edit task");
       setIsLoading(false);
     },
   });
 
   // completed task
-  const handleComplete = (id: number) => {
+  const handleComplete = (todo: TaskType) => {
     setIsLoading(true);
-    const getTodoById: TaskType | undefined = props?.todos.find(
-      (todo: TaskType) => todo.id == id
-    );
-    const complete = !getTodoById?.completed;
-    setCompleted(complete);
-    editTodo.mutate({ id, complete });
+    editTodo.mutate({ id: todo.id, complete: !todo.completed });
   };
 
   return (
@@ -63,15 +57,15 @@ const Todo = (props: TodoProps) => {
       <label className="w-full cursor-pointer flex items-center gap-1">
         <Checkbox
           name="checkbox"
-          checked={completed}
-          color="success"
-          onChange={() => handleComplete(props.todo.id)}
+          checked={props.todo.completed}
+          color={props.todo.completed ? "success" : "warning"}
+          onChange={() => handleComplete(props.todo)}
           disabled={isLoading}
         />
         <Typography
           component="span"
           className={`w-3/5 ${
-            completed ? "line-through opacity-75" : "opacity-100"
+            props.todo.completed ? "line-through opacity-75" : "opacity-100"
           }`}
         >
           {props?.todo.title}

@@ -1,51 +1,35 @@
 "use client";
+
 import { useTodo } from "@/Query";
 import { TaskType } from "@/interfaces/interface";
 import Todo from "@/components/Todo";
-import Loading from "@/components/loading/Loading";
+import Loading from "@/components/Loading";
 import React, { useState } from "react";
 import { Pagination } from "@mui/material";
 import AddTask from "@/components/AddTask";
 import SelectComponent from "@/components/SelectComponent";
+import { applyFilter } from "@/utils/filter";
+import { applyPagination } from "@/utils/pagination";
 
 export default function Home() {
-  const [filter, setFilter] = useState("all");
   const getTasks = useTodo();
 
-  // filter
-  let filterData: TaskType[] = getTasks?.data?.data;
-
-  switch (filter) {
-    case "all":
-      filterData = getTasks?.data?.data;
-      break;
-    case "completed":
-      filterData = getTasks?.data?.data.filter(
-        (item: TaskType) => item.completed == true
-      );
-      break;
-    case "uncompleted":
-      filterData = getTasks?.data?.data.filter(
-        (item: TaskType) => item.completed === false
-      );
-      break;
-  }
-
-  // pagination
+  const [filter, setFilter] = useState("all");
   const [page, setPage] = useState<number>(1);
-  const itemsPerPage = 10;
-  const totalPages = filterData
-    ? Math.ceil(filterData.length / itemsPerPage)
-    : 0;
+
+  const dataFiltered = applyFilter({
+    inputData: getTasks?.data,
+    filterName: filter,
+  });
+
+  const { paginationData, totalPages } = applyPagination({
+    inputData: dataFiltered,
+    page,
+  });
 
   const handleChange = (event: any, value: number) => {
     setPage(value);
   };
-
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = page * itemsPerPage;
-
-  const currentPageData = filterData?.slice(startIndex, endIndex);
 
   // loading
   if (getTasks.isLoading) return <Loading />;
@@ -56,12 +40,16 @@ export default function Home() {
         <AddTask />
         <SelectComponent filter={filter} setFilter={setFilter} />
         <ul>
-          {currentPageData?.length ? (
-            currentPageData.map((task: TaskType) => (
-              <Todo key={task.id} todo={task} todos={getTasks?.data?.data} />
+          {dataFiltered?.length ? (
+            paginationData.map((task: TaskType) => (
+              <Todo key={task.id} todo={task} todos={getTasks?.data} />
             ))
           ) : (
-            <p className="text-gray-500">No tasks yet :(</p>
+            <p className="text-gray-500">
+              {filter === "all"
+                ? "There is no tasks"
+                : `${filter} tasks is not available`}
+            </p>
           )}
         </ul>
         <div>
@@ -71,7 +59,7 @@ export default function Home() {
               page={page}
               onChange={handleChange}
               color="primary"
-              className={`${currentPageData.length ? "" : "hidden"}`}
+              className={`${paginationData.length ? "" : "hidden"}`}
             />
           </div>
         </div>
